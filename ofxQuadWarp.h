@@ -12,6 +12,7 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "ofxMSAInteractiveObject.h"
+#include "ofxXmlSettings.h"
 
 class ofxQuadWarp 
 {
@@ -28,6 +29,9 @@ public:
     ofMatrix4x4 getMatrixInverse ();
     ofMatrix4x4 getMatrix        ( ofPoint* srcPoints, ofPoint* dstPoints );
     
+    void load(string loadFile);
+    void save(string saveFile);
+
     void setCorners                     ( ofPoint* corners );
     void setCorner                      ( ofPoint p, int cornerIndex );
     void setTopLeftCornerPosition       ( ofPoint p );

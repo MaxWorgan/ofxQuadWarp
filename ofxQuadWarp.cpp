@@ -17,7 +17,7 @@ ofxQuadWarp :: ofxQuadWarp ()
     setSourceRect( ofRectangle( 0, 0, ofGetWidth(), ofGetHeight() ) );
     reset();
     
-    ofAddListener( ofEvents().mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
+    ofAddListener( ofEvents.mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
 }
 
 ofxQuadWarp :: ~ofxQuadWarp ()
@@ -26,7 +26,7 @@ ofxQuadWarp :: ~ofxQuadWarp ()
     {
         try 
         {
-            ofRemoveListener( ofEvents().mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
+            ofRemoveListener( ofEvents.mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
         }
         catch( Poco::SystemException ) 
         {
@@ -34,6 +34,41 @@ ofxQuadWarp :: ~ofxQuadWarp ()
         }
     }
 }
+void ofxQuadWarp::save(string saveFile){
+	ofxXmlSettings XML;
+	XML.clear();
+	XML.addTag("anchors");
+	XML.pushTag("anchors");
+	
+	
+	for(int i =0; i<4; i++){
+		int t = XML.addTag("anchor");
+		XML.setValue("anchor:x",anchors[i].x, t);
+		XML.setValue("anchor:y",anchors[i].y, t);
+	}
+	XML.saveFile(saveFile);
+}
+//--------------------------------------------------------------
+void ofxQuadWarp::load(string loadFile){
+	ofxXmlSettings XML;
+	if( !XML.loadFile(loadFile) ){
+        ofLog(OF_LOG_ERROR, "ofxQuadWarp: xml file not loaded");
+    }
+	else if(!XML.pushTag("anchors") || XML.getNumTags("anchor")<4 ) {
+		ofLog(OF_LOG_ERROR, "ofxQuadWarp: xml formating error");
+	}
+	else {
+        for(int i =0; i<4; i++){
+            int t = XML.addTag("anchor");
+            XML.pushTag("anchor", i);
+            if (XML.tagExists("x") && XML.tagExists("y")){
+                setCorner(ofPoint(XML.getValue("x", double(1.0)), XML.getValue("y", double(1.0))),i);
+            }
+            XML.popTag();
+        }
+    }
+}
+
 
 void ofxQuadWarp :: setSourceRect ( const ofRectangle& r )
 {
@@ -231,7 +266,7 @@ void ofxQuadWarp :: show ()
     if( bShow )
         return;
     
-    ofAddListener( ofEvents().mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
+    ofAddListener( ofEvents.mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
     
     bShow = true;
 }
@@ -241,7 +276,7 @@ void ofxQuadWarp :: hide ()
     if( !bShow )
         return;
     
-    ofRemoveListener( ofEvents().mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
+    ofRemoveListener( ofEvents.mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
     
     bShow = false;
 }
