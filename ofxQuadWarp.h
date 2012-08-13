@@ -43,6 +43,7 @@ public:
     void hide           ();
     void toggleShow     ();
     void draw           ();
+    void setScale(const float scale) {mScale = scale;}
     
     void onMouseDragged ( ofMouseEventArgs &mouseArgs );
     
@@ -51,6 +52,7 @@ public:
     
 	ofxMSAInteractiveObject		anchors[ 4 ];
 	int							anchorSize;
-    
+    float mXOffset,mYOffset;
+    float mScale;
     bool bShow;
 };

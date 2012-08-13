@@ -13,9 +13,10 @@ ofxQuadWarp :: ofxQuadWarp ()
     anchorSize = 10;
     
     bShow = true;
-    
+    mXOffset = mYOffset = 0;
     setSourceRect( ofRectangle( 0, 0, ofGetWidth(), ofGetHeight() ) );
     reset();
+    mScale = 1.0f;
     
     ofAddListener( ofEvents().mouseDragged, this, &ofxQuadWarp :: onMouseDragged );
 }
@@ -46,6 +47,11 @@ void ofxQuadWarp::save(string saveFile){
 		XML.setValue("anchor:x",anchors[i].x, t);
 		XML.setValue("anchor:y",anchors[i].y, t);
 	}
+    XML.popTag();
+    XML.addTag("offset");
+    XML.setValue("offset:x", mXOffset);
+    XML.setValue("offset:y", mYOffset);
+    XML.popTag();
 	XML.saveFile(saveFile);
 }
 //--------------------------------------------------------------
@@ -66,6 +72,11 @@ void ofxQuadWarp::load(string loadFile){
             }
             XML.popTag();
         }
+        XML.addTag("offset");
+        XML.pushTag("offset");
+        mXOffset = XML.getValue("x", 0.0);
+        mYOffset = XML.getValue("y", 0.0);
+        XML.popTag();
     }
 }
 
@@ -212,13 +223,13 @@ void ofxQuadWarp :: onMouseDragged( ofMouseEventArgs& mouseArgs )
 	{
 		if( anchors[ i ].isMouseDown() )
 		{
-			dstPoints[ i ].x = mouseArgs.x;
-            dstPoints[ i ].y = mouseArgs.y;
+			dstPoints[ i ].x = (mouseArgs.x  - mXOffset) * 1.0f/mScale;
+            dstPoints[ i ].y = (mouseArgs.y  - mYOffset) * 1.0f/mScale;
             
 			anchors[ i ].setPos
 			(
-                mouseArgs.x - anchorSize * 0.5,
-                mouseArgs.y - anchorSize * 0.5
+             mouseArgs.x - anchorSize * 0.5,
+             mouseArgs.y - anchorSize * 0.5
             );
 		}
 	}
@@ -236,8 +247,11 @@ void ofxQuadWarp :: setCorners ( ofPoint* corners )
 void ofxQuadWarp :: setCorner( ofPoint p, int cornerIndex )
 {
     cornerIndex = ofClamp( cornerIndex, 0, 3 );
-    dstPoints[ cornerIndex ] = p;
-    anchors[ cornerIndex ].setPos( p.x - anchorSize * 0.5, p.y - anchorSize * 0.5 );
+    dstPoints[ cornerIndex ] = p;//(p * (1.0/mScale)) + ofPoint(mXOffset,mYOffset);
+    anchors[ cornerIndex ].setPos( 
+                ((p.x -  (anchorSize * 0.5)) * mScale) + mXOffset, 
+                ((p.y  - (anchorSize * 0.5)) * mScale) + mYOffset  
+                                  );
 }
 
 void ofxQuadWarp :: setTopLeftCornerPosition ( ofPoint p )
@@ -299,11 +313,11 @@ void ofxQuadWarp :: draw ()
 	for( int i=0; i<4; i++ )
 	{
         int s = anchorSize;
-        ofRect( dstPoints[ i ].x - s * 0.5, dstPoints[ i ].y - s * 0.5, s, s );
+        ofRect( anchors[i].x  - s * 0.5, anchors[ i ].y - s * 0.5, s, s );
 	}
 	
-	ofLine( dstPoints[ 0 ].x, dstPoints[ 0 ].y, dstPoints[ 1 ].x, dstPoints[ 1 ].y );
-	ofLine( dstPoints[ 1 ].x, dstPoints[ 1 ].y, dstPoints[ 2 ].x, dstPoints[ 2 ].y );
-	ofLine( dstPoints[ 2 ].x, dstPoints[ 2 ].y, dstPoints[ 3 ].x, dstPoints[ 3 ].y );
-	ofLine( dstPoints[ 3 ].x, dstPoints[ 3 ].y, dstPoints[ 0 ].x, dstPoints[ 0 ].y );
+	ofLine( anchors[ 0 ].x, anchors[ 0 ].y, anchors[ 1 ].x, anchors[ 1 ].y );
+	ofLine( anchors[ 1 ].x, anchors[ 1 ].y, anchors[ 2 ].x, anchors[ 2 ].y );
+	ofLine( anchors[ 2 ].x, anchors[ 2 ].y, anchors[ 3 ].x, anchors[ 3 ].y );
+	ofLine( anchors[ 3 ].x, anchors[ 3 ].y, anchors[ 0 ].x, anchors[ 0 ].y );
 }
